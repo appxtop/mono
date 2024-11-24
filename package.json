@@ -1,0 +1,18 @@
+{
+  "name": "mono",
+  "private": true,
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "dev:engine": "pnpm -F @mono/engine dev",
+    "start:engine": "pnpm -F @mono/engine start",
+    "dev:backend": "pnpm -F @mono/backend dev",
+    "start:backend:": "pnpm -F @mono/backend start",
+    "dev:client-web": "pnpm -F @mono/client-web dev"
+  }
+}

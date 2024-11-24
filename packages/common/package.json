@@ -1,0 +1,12 @@
+{
+  "name": "@mono/common",
+  "main": "src/index.ts",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13",
+    "@types/validator": "^13.12.2"
+  }
+}

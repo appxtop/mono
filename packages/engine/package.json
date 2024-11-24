@@ -1,0 +1,19 @@
+{
+  "name": "@mono/engine",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@mono/common": "workspace:^",
+    "@mono/dbman": "workspace:^",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13",
+    "@types/node": "^22.9.3",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0"
+  },
+  "scripts": {
+    "dev": "ts-node-dev src/bin/start.ts",
+    "start": "ts-node src/bin/start.ts"
+  }
+}

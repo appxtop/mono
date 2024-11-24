@@ -1,0 +1,14 @@
+{
+  "name": "@mono/dbman",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@mono/common": "workspace:^",
+    "@mono/common-node": "workspace:^",
+    "mongodb": "^6.11.0",
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13",
+    "@types/node": "^22.9.3"
+  }
+}

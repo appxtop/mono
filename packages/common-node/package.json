@@ -1,0 +1,13 @@
+{
+  "name": "@mono/common-node",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@mono/common": "workspace:^",
+    "dotenv": "^16.4.5",
+    "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.3",
+    "@types/nodemailer": "^6.4.17"
+  }
+}
