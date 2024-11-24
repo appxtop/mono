@@ -28,3 +28,7 @@ npm run dev:client-web
 ```
 
 ## 等待解决问题
+
+bug:修改邮箱没有验证验证码
+
+feat:忘记密码功能

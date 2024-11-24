@@ -1,65 +1,43 @@
 <template>
   <div class="header-container">
-    <div class="logo-container">
-      <RouterLink to="/" class="link">
-        <img fill="red" style="fill: true" class="logo" src="/logo.svg" />
-        Miao
-      </RouterLink>
-    </div>
-    <div class="menu-container">
-      <el-dropdown v-if="user">
-        <span class="el-dropdown-link menu-link">
-          {{ user.nickname + "(" + user.username + ")" }}
-          <el-icon class="el-icon--right">
-            <ArrowDown />
-          </el-icon>
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="handleGoToUserProfile()">
-              个人中心
-            </el-dropdown-item>
-            <el-dropdown-item @click="handleGoToSettings()">
-              设置
-            </el-dropdown-item>
-            <el-dropdown-item @click="handleLogout()">
-              退出登录
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <template v-else-if="user === null">
-        <router-link to="/login" class="menu-link" :class="{ active: isActive('/login') }">
+    <el-menu mode="horizontal" :router="true" :default-active="$route.path" :ellipsis="false">
+
+      <el-menu-item class="home" index="/">
+        <img style="height:100%;" class="logo" src="/logo.svg" />Miao
+      </el-menu-item>
+
+      <template v-if="user === null">
+        <el-menu-item index="/login">
           登录
-        </router-link>
-        <router-link to="/register" class="menu-link" :class="{ active: isActive('/register') }">
+        </el-menu-item>
+        <el-menu-item index="/register">
           注册
-        </router-link>
+        </el-menu-item>
       </template>
-    </div>
+
+      <el-sub-menu v-if="user">
+        <template #title>{{ user.nickname + "(" + user.username + ")" }}</template>
+        <el-menu-item index="/user">
+          个人中心
+        </el-menu-item>
+        <el-menu-item index="/settings">
+          设置
+        </el-menu-item>
+        <el-menu-item @click="handleLogout()">
+          退出登录
+        </el-menu-item>
+      </el-sub-menu>
+    </el-menu>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { ArrowDown } from "@element-plus/icons-vue";
-// import { userStore } from '../store/user';
 import router from "../router";
-const user = computed(() => userStore.user);
-
-import { useRoute } from "vue-router";
 import { userStore } from "../store/user";
-import { setToken } from "../db";
-const route = useRoute();
-function isActive(path: string) {
-  return route.path === path;
-}
-function handleGoToUserProfile() {
-  router.push("/user");
-}
-function handleGoToSettings() {
-  router.push("/settings");
-}
+import { setToken } from "../data";
+const user = computed(() => userStore.user);
 function handleLogout() {
   setToken("");
   userStore.updateUser(null);
@@ -69,48 +47,22 @@ function handleLogout() {
 
 <style lang="less" scoped>
 .header-container {
-  height: var(--header-height);
+  user-select: none;
   background-color: #2f3138;
-  display: flex;
-  padding-left: 32px;
-  padding-right: 12px;
-  border-bottom: 1px solid var(--header-border-color);
 
-  .logo-container {
-    padding: 2px;
+  .el-menu--horizontal {
+    --el-menu-horizontal-height: 40px;
+  }
 
-    &>.link {
-      text-decoration: none;
-      line-height: var(--header-height);
+  .el-menu--horizontal>.el-menu-item {
+    &:nth-child(1) {
+      margin-right: auto;
+    }
 
-      .logo {
-        height: 100%;
-      }
+    &.home {
+      border-bottom-width: 0;
     }
   }
 
-  .menu-container {
-    flex: 1;
-    text-align: right;
-
-    .menu-link {
-      padding: 0 10px;
-      display: inline-block;
-      line-height: calc(var(--header-height) - 2px);
-      font-size: 14px;
-      text-decoration: none;
-      align-items: center;
-      color: var(--text-color);
-      border-bottom: 2px solid transparent; //占位置
-
-      &:hover {
-        color: aqua;
-      }
-
-      &.active {
-        border-bottom-color: #409eff;
-      }
-    }
-  }
 }
 </style>

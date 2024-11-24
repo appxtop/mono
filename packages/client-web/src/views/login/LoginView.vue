@@ -40,7 +40,7 @@ import { useRouter } from 'vue-router';
 import { ElMessageBox } from 'element-plus';
 import { validatePassword, validateUsername } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
-import { setToken } from '../../db';
+import { setToken } from '../../data';
 import { ws } from '../../sigleton/ws';
 
 

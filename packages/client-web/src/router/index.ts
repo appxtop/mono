@@ -6,12 +6,13 @@ import UserView from '../views/user/UserView.vue';
 import ModifyPasswordView from '../views/user/ModifyPasswordView.vue';
 import SettingsView from '../views/settings/SettingsView.vue';
 import GameView from '../views/GameView.vue';
-const routes: { path: string, component: any }[] = [
+const routes: { path: string, name?: string, component: any }[] = [
     {
         path: '/',
         component: HomeView
     }, {
         path: "/login",
+        name: "登录页面",
         component: LoginView
     }, {
         path: '/register',

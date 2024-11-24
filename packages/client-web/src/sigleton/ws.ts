@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { getToken } from "../db";
+import { getToken } from "../data";
 import { HEADER_TOKEN_KEY } from "@mono/common";
 
 class MySocketIO {

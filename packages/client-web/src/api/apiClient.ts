@@ -1,7 +1,7 @@
 import axios from "axios";
 import router from "../router";
 import { ApiTypeMap, HEADER_TOKEN_KEY, ApiResultBase, ApiErrorCode } from "@mono/common";
-import { getToken } from "../db";
+import { getToken } from "../data";
 const apiClient = axios.create({
     // baseURL: '/',//api
 });
