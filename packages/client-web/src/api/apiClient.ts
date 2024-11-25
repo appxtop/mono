@@ -30,7 +30,12 @@ export async function apiRequest<T extends keyof ApiTypeMap>(path: T, data: ApiT
     const result = res.data as ApiResultBase;
     if (!result.ok) {
         if (result.errorCode === ApiErrorCode.Unauthorized) {
-            router.push('/login');
+            router.push({
+                path: '/login',
+                query: {
+                    redirect: router.currentRoute.value.fullPath
+                }
+            });
         }
         throw new Error(result.error);
     }

@@ -34,7 +34,7 @@ ws.addListener('user', user => {
   }
 
   &>.content {
-    background-color: #94BF94;
+    background-color: #282828;
     flex: 1;
   }
 

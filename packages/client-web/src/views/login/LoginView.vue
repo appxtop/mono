@@ -36,15 +36,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { validatePassword, validateUsername } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
 import { setToken } from '../../data';
 import { ws } from '../../sigleton/ws';
 
-
-const router = useRouter();
 const loginForm = ref<any>();
 const formData = ref({
     username: '',
@@ -63,7 +60,7 @@ function handleSubmit() {
                     const res = await apiRequest('/api/auth/login', data);
                     setToken(res.token);
                     ws.newSocket();
-                    router.push('/');
+                    ElMessage.success("登录成功");
                 } catch (e) {
                     errorMsg.value = '' + e;
                 }

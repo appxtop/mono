@@ -1,6 +1,7 @@
 import { UserModel } from "@mono/common";
 import { defineStore } from "pinia";
 import pinia from "./pinia";
+import { checkRule } from "../router";
 
 const useUserStore = defineStore('user', {
     state() {
@@ -14,7 +15,8 @@ const useUserStore = defineStore('user', {
     actions: {
         updateUser(user: UserModel | null) {
             this.user = user;
-        }
+            checkRule();
+        },
     }
 });
 

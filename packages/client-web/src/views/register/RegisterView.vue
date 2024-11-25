@@ -83,11 +83,10 @@
 
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { validateEmail, validateNickname, validatePassword, validateUsername, validateVerCode } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
 import { setToken } from '../../data';
-import { routeSource } from '../../router';
 import { ws } from '../../sigleton/ws';
 
 const loginForm = useTemplateRef<any>('loginFormRef');
@@ -144,7 +143,7 @@ function handleSubmit() {
                     const res = await apiRequest('/api/register/submit', data);
                     setToken(res.token);
                     ws.newSocket();
-                    routeSource('/');
+                    ElMessage.success("注册成功");
                 } catch (e) {
                     errorMsg.value = '' + e;
                 }

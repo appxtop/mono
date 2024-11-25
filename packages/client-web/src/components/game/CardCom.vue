@@ -171,7 +171,7 @@ onMounted(() => {
 <style lang="less" scoped>
 .cursor-drag {
   cursor: move;
-  outline: 5px solid red !important;
+  outline: 5px solid rgb(21, 191, 44);
 }
 
 .cursor-default {
@@ -183,13 +183,15 @@ onMounted(() => {
 }
 
 .card-inner {
+  --card-border-color: red;
+
   &:hover {
     outline: 5px solid green;
   }
 
   width: 250px;
   height: 300px;
-  border: 10px solid #1f1f1f;
+  border: 10px solid var(--card-border-color);
   border-radius: 5px;
   background-color: #f9f3de;
   user-select: none;
@@ -201,7 +203,7 @@ onMounted(() => {
     height: 50px;
     font-size: 20px;
     font-weight: bold;
-    border-bottom: 10px solid #1f1f1f;
+    border-bottom: 10px solid var(--card-border-color);
     padding: 5px;
     color: #1b1a1a;
 
