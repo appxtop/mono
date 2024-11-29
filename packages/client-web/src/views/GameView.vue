@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, useTemplateRef, watch } from "vue";
+import { computed, onMounted, onUnmounted, useTemplateRef } from "vue";
 import CardCom from "../components/game/CardCom.vue";
 import { ws } from "../sigleton/ws";
 import { userStore } from "../store/user";

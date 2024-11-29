@@ -87,6 +87,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { validateEmail, validateNickname, validatePassword, validateUsername, validateVerCode } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
 import { setToken } from '../../data';
+import router from '../../router';
 
 const loginForm = useTemplateRef<any>('loginFormRef');
 const formData = ref({
@@ -141,6 +142,7 @@ function handleSubmit() {
             const data = { ...formData.value };
             const res = await apiRequest('/api/register/submit', data);
             setToken(res.token);
+            router.push('/');
             ElMessage.success("注册成功");
         } catch (e) {
             errorMsg.value = '' + e;

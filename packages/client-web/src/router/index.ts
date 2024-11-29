@@ -55,27 +55,10 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes
 });
-export function checkRule() {
-    const curRoute = router.currentRoute.value;
-    if (userStore.user) {//认证成功了,判断是否需要跳转
-        if (curRoute.path === '/login' || curRoute.path === '/register') {
-            const redirect = curRoute.query.redirect?.toString() || '/';
-            router.push(redirect);
-        }
-    } else if (userStore.user === null) {//认证失败
-        if (!curRoute.meta?.visitor) {
-            router.push({
-                path: '/login',
-                query: {
-                    redirect: curRoute.path
-                }
-            });
-        }
-    }
-}
+
 // 导航守卫
 router.beforeEach((to, _from, next) => {
-    if (userStore.user || userStore.user === 0 || to.meta.visitor) {
+    if (userStore.status !== 'loggedOut' || to.meta.visitor) {
         next();
     } else {
         next({
@@ -84,7 +67,6 @@ router.beforeEach((to, _from, next) => {
         });
     }
 })
-
 
 export default router;
 

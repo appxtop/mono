@@ -40,6 +40,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { validatePassword, validateUsername } from "@mono/common";
 import { apiRequest } from "../../api/apiClient";
 import { setToken } from "../../data";
+import router from "../../router";
 
 const loginForm = ref<any>();
 const formData = ref({
@@ -60,6 +61,7 @@ function handleSubmit() {
             const data = { ...formData.value };
             const res = await apiRequest("/api/auth/login", data);
             setToken(res.token);
+            router.push('/');
             ElMessage.success("登录成功");
         } catch (e) {
             errorMsg.value = "" + e;
