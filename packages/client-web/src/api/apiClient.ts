@@ -1,7 +1,8 @@
 import axios from "axios";
-import router from "../router";
-import { ApiTypeMap, HEADER_TOKEN_KEY, ApiResultBase, ApiErrorCode } from "@mono/common";
+import { HEADER_TOKEN_KEY, ApiErrorCode, ApiMap, ApiMapBody, ApiResult, ApiMapUnwrappedReturn } from "@mono/common";
 import { getToken } from "../data";
+import { evtBus } from "../sigleton/evtBus";
+import { ws } from "../sigleton/ws";
 const apiClient = axios.create({
     // baseURL: '/',//api
 });
@@ -24,22 +25,16 @@ apiClient.interceptors.request.use(config => {
 //     return Promise.reject(error);
 // });
 
-export async function apiRequest<T extends keyof ApiTypeMap>(path: T, data: ApiTypeMap[T]['request']): Promise<ApiTypeMap[T]['response']> {
-    // const res = await ws.request(path, data);
-    const res = await apiClient.post(path, data);
-    const result = res.data as ApiResultBase;
-    if (!result.ok) {
-        if (result.errorCode === ApiErrorCode.Unauthorized) {
-            router.push({
-                path: '/login',
-                query: {
-                    redirect: router.currentRoute.value.fullPath
-                }
-            });
+export async function apiRequest<K extends keyof ApiMap>(path: K, body: ApiMapBody<K>): Promise<ApiMapUnwrappedReturn<K>> {
+    const res = await ws.request(path, body);
+    if (res.ok) {
+        return res.data;
+    } else {
+        if (res.errorCode === ApiErrorCode.Unauthorized) {
+            evtBus.emit('API:Unauthorized');
         }
-        throw new Error(result.error);
+        throw new Error(res.error);
     }
-    return res.data;
 }
 
 

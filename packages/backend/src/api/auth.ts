@@ -1,9 +1,8 @@
 import { client } from "@mono/dbman";
 import { comparePwd, genToken } from "../authlib";
-import { ApiError } from "@mono/common";
-import { ApiMapType } from ".";
+import { ApiError, ApiMap } from "@mono/common";
 
-export const auth: Pick<ApiMapType, '/api/auth/login'> = {
+export const auth: Pick<ApiMap, '/api/auth/login'> = {
     "/api/auth/login": {
         fn: async (body: {
             username: string;

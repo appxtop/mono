@@ -4,8 +4,8 @@ import { getConfig } from '@mono/common-node';
 import { connectAll } from '@mono/dbman';
 import { startSocketServer } from './socket';
 import _ from 'lodash';
-import { HEADER_TOKEN_KEY } from '@mono/common';
-import { ApiMapType, execApi } from './api';
+import { ApiMap, HEADER_TOKEN_KEY } from '@mono/common';
+import { execApi } from './api';
 
 
 export async function startBackendServer() {
@@ -14,7 +14,7 @@ export async function startBackendServer() {
     app.use(express.json({ limit: '50mb' }));
 
     app.use(async (req, res) => {
-        const path = req.path as keyof ApiMapType;
+        const path = req.path as keyof ApiMap;
         const token = req.headers[HEADER_TOKEN_KEY] as string;
         const body = req.body;
         const result = await execApi({ path, token, body });

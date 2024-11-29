@@ -1,4 +1,10 @@
-import { ApiError, ApiErrorCode, ApiResultBase, ApiTypeMap } from "@mono/common";
+import {
+    ApiError,
+    ApiErrorCode,
+    ApiMap,
+    ApiMapBody,
+    ApiResult,
+} from "@mono/common";
 import { SessionUser } from "../types";
 import { checkToken } from "../authlib";
 import { auth } from "./auth";
@@ -7,68 +13,74 @@ import { user } from "./user";
 import { card } from "./card";
 import _ from "lodash";
 
-export type ApiMapType = {
-    [path in keyof ApiTypeMap]:
-    {
-        user: true,
-        fn: (
-            reqBody: ApiTypeMap[path]['request'],
-            user: SessionUser
-        ) => Promise<ApiTypeMap[path]['response']>
-    } | {
-        user?: false,
-        fn: (
-            reqBody: ApiTypeMap[path]['request']
-        ) => Promise<ApiTypeMap[path]['response']>
-    }
-};
-
-const apiMap: ApiMapType = {
+const apiMap: ApiMap = {
     ...auth,
     ...register,
     ...user,
-    ...card
-}
-
-export async function execApi(
-    opts: {
-        path: keyof typeof apiMap,
-        body: any,
-        token?: string,
-        user?: SessionUser
-    }) {
-
-    const { path, token, body, user } = opts;
-
-    const routerItem = apiMap[path];
-    let result: ApiResultBase;
-    if (!routerItem) {
-        result = {
-            errorCode: ApiErrorCode.ApiNotFound
+    ...card,
+    // "/test": {
+    //     fn: (body: { uuuu: string }) => {
+    //         const { uuuu } = body;
+    //         console.log(uuuu);
+    //         return 123;
+    //     }
+    // }
+};
+(async () => {
+    const res = await execApi({
+        path: '/api/auth/login',
+        body: {
+            username: '',
+            password: ''
         }
-        return result;
+    });
+});
+
+export async function execApi<K extends keyof ApiMap>(opts: {
+    path: K;
+    body: ApiMapBody<K>,
+    token?: string;
+    user?: SessionUser | null;
+}): Promise<ApiResult<K>> {
+    const { path, token, body, user } = opts;
+    const apiItem = apiMap[path];
+    if (!apiItem) {
+        return {
+            errorCode: ApiErrorCode.ApiNotFound,
+            error: 'Api不存在'
+        };
     }
     try {
-        let user_: SessionUser;
-        if (routerItem.user) {
-            user_ = user || await checkToken(token);
+        const fn = apiItem.fn;
+        if (fn.length == 2) {
+            const user_ = user || (await checkToken(token));
+            if (!user_) {
+                throw new ApiError(ApiErrorCode.Unauthorized);
+            }
+            const data = await fn(body, user_);
+            return {
+                ok: 1,
+                data: data
+            };
+        } else if (fn.length == 1) {
+            const data = await fn(body);
+            return {
+                ok: 1,
+                data
+            }
         }
-        const data = await routerItem.fn(body, user_!);
-        result = _.extend({ ok: 1 } as any, data);
-    } catch (e: any) {
+        throw new Error('api定义错误');
+    } catch (e) {
         if (e instanceof ApiError) {
-            result = {
+            return {
                 errorCode: e.errorCode,
                 error: e.error
             }
         } else {
-            console.log(e);
-            result = {
+            return {
                 errorCode: ApiErrorCode.SystemError,
                 error: "系统异常"
             }
         }
     }
-
-    return result;
 }

@@ -10,15 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import HeaderCom from './components/HeaderCom.vue';
-import { ws } from './sigleton/ws';
-import { userStore } from './store/user';
-ws.addListener('user', user => {
-  userStore.updateUser(user);
-})
-
+import HeaderCom from "./components/HeaderCom.vue";
 </script>
-
 
 <style lang="less" scoped>
 .app {
@@ -29,14 +22,13 @@ ws.addListener('user', user => {
   display: flex;
   flex-direction: column;
 
-  &>.header {
+  & > .header {
     background-color: green;
   }
 
-  &>.content {
+  & > .content {
     background-color: #282828;
     flex: 1;
   }
-
 }
 </style>

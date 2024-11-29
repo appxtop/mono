@@ -1,11 +1,10 @@
 import { client } from "@mono/dbman";
-import { validateEmail, validateNickname, validatePassword, validateUsername, UserModel, ApiError } from "@mono/common";
+import { validateEmail, validateNickname, validatePassword, validateUsername, UserModel, ApiError, ApiMap } from "@mono/common";
 import { hashPwd, genToken } from "../authlib";
 import { checkVercode } from "./user";
-import { ApiMapType } from ".";
 
 
-export const register: Pick<ApiMapType,
+export const register: Pick<ApiMap,
     | '/api/register/submit'
     | '/api/register/checkEmail'
     | '/api/register/checkNickname'

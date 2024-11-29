@@ -1,11 +1,10 @@
-import { ApiError, KVKeys, log, validateEmail, validateNickname, validatePassword } from "@mono/common";
+import { ApiError, ApiMap, KVKeys, log, validateEmail, validateNickname, validatePassword } from "@mono/common";
 import { comparePwd, hashPwd } from "../authlib";
 import { client } from "@mono/dbman";
 import { SessionUser } from "../types";
 import { roomEmit, RoomEmitKey_user } from "../socket";
 import { sendEmail } from '@mono/common-node';
 import { kvClient } from '@mono/dbman';
-import { ApiMapType } from ".";
 
 export async function checkVercode(email: string, verCode: string) {
     const verCode_ = await kvClient.get(KVKeys.VERCODE + email);
@@ -17,14 +16,13 @@ export async function checkVercode(email: string, verCode: string) {
     }
 }
 
-export const user: Pick<ApiMapType,
+export const user: Pick<ApiMap,
     | "/api/user/sendVerCode"
     | "/api/user/setEmail"
     | "/api/user/setNickname"
     | "/api/user/setPassword"
 > = {
     "/api/user/setPassword": {
-        user: true,
         fn: async function (body: { oldPassword: string; newPassword: string; }, user: SessionUser): Promise<void> {
             const { oldPassword, newPassword } = body;
             validatePassword(newPassword);
@@ -50,7 +48,6 @@ export const user: Pick<ApiMapType,
         }
     },
     "/api/user/setEmail": {
-        user: true,
         fn: async function (body: { email: string; verCode: string; }, user: SessionUser): Promise<void> {
             const email = body.email.toLowerCase();
             const verCode = body.verCode;
@@ -84,7 +81,6 @@ export const user: Pick<ApiMapType,
         }
     },
     "/api/user/setNickname": {
-        user: true,
         fn: async function (body: { nickname: string; }, user: SessionUser): Promise<void> {
             const nickname = body.nickname;
             validateNickname(nickname);

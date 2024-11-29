@@ -7,34 +7,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, useTemplateRef, watch } from "vue";
+import { computed, onMounted, onUnmounted, useTemplateRef, watch } from "vue";
 import CardCom from "../components/game/CardCom.vue";
-import { gameStore } from "../store/game";
 import { ws } from "../sigleton/ws";
 import { userStore } from "../store/user";
-import { CardModel } from "@mono/common";
 import _ from "lodash";
-const cards = computed(() => gameStore.card.cards);
+import { cardStore } from "../store/card";
+const cards = computed(() => cardStore.subData.cards);
 // const loadding = ref(true);
-
-watch(() => userStore.user, user => {
-  if (user) {
-    const channel = 'cards:' + user._id;
-    ws.subscribe(channel);
-    ws.addListener(channel, (data: {
-      gameTime: number,
-      cards: {
-        [id: string]: CardModel
-      }
-    }) => {
-      gameStore.updateCard(data);
-    })
-  }
-}, {
-  immediate: true
-});
-
-
 const comRef = useTemplateRef("comRef");
 onMounted(() => {
   const com = comRef.value;
@@ -42,6 +22,15 @@ onMounted(() => {
     return;
   }
 });
+
+onUnmounted(() => {
+  if (userStore.user) {
+    const channel = 'cards:' + userStore.user._id;
+    console.log('取消订阅');
+    ws.unSubscribe(channel);
+  }
+})
+
 </script>
 
 <style lang="less" scoped></style>

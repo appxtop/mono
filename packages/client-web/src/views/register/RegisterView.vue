@@ -87,7 +87,6 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { validateEmail, validateNickname, validatePassword, validateUsername, validateVerCode } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
 import { setToken } from '../../data';
-import { ws } from '../../sigleton/ws';
 
 const loginForm = useTemplateRef<any>('loginFormRef');
 const formData = ref({
@@ -102,56 +101,50 @@ const verCode_btn_disableText = ref("");
 const verCode_btn_enable = ref(true);
 async function handleSendVerCode() {
     loginForm.value.validateField(['email'], async (valid: boolean) => {
-        if (valid) {
-            //#TODO 单独验证email
+        if (!valid) {
+            ElMessageBox.alert('邮箱不符合条件');
+            return;
+        }
+        try {
             verCode_btn_disableText.value = "发送中...";
             verCode_btn_enable.value = false;
-            try {
-                await apiRequest('/api/user/sendVerCode', { email: formData.value.email });
-                ElMessageBox.alert('验证码发送成功');
-                //60秒后重发
-                let num = 60;
-                const timeoutId = setInterval(() => {
-                    num--;
-                    verCode_btn_disableText.value = `${num}秒后重发`;
-                    if (num <= 0) {
-                        verCode_btn_enable.value = true;
-                        clearTimeout(timeoutId)
-                    }
-                }, 1000);
-            } catch (e) {
-                ElMessageBox.alert('' + e);
-                verCode_btn_enable.value = true;
-            }
-        } else {
-            ElMessageBox.alert('邮箱不符合条件');
+            await apiRequest('/api/user/sendVerCode', { email: formData.value.email });
+            ElMessage.success("验证码发送成功");
+            //60秒后重发
+            let num = 60;
+            const timeoutId = setInterval(() => {
+                num--;
+                verCode_btn_disableText.value = `${num}秒后重发`;
+                if (num <= 0) {
+                    verCode_btn_enable.value = true;
+                    clearTimeout(timeoutId)
+                }
+            }, 1000);
+        } catch (e) {
+            ElMessageBox.alert('' + e);
+            verCode_btn_enable.value = true;
         }
     });
 }
-
 
 const loading = ref(false);
 const errorMsg = ref('');
 function handleSubmit() {
     errorMsg.value = '';
     loginForm.value.validate(async (valid: boolean) => {
+        if (!valid) {
+            ElMessageBox.alert("请正确输入每一项");
+            return;
+        }
         try {
-            if (valid) {
-                loading.value = true;
-                const data = { ...formData.value };
-                try {
-                    const res = await apiRequest('/api/register/submit', data);
-                    setToken(res.token);
-                    ws.newSocket();
-                    ElMessage.success("注册成功");
-                } catch (e) {
-                    errorMsg.value = '' + e;
-                }
-            } else {
-                ElMessageBox.alert('请正确输入每一项')
-            }
+            loading.value = true;
+            const data = { ...formData.value };
+            const res = await apiRequest('/api/register/submit', data);
+            setToken(res.token);
+            ElMessage.success("注册成功");
         } catch (e) {
-            ElMessageBox.alert('出错了:' + e)
+            errorMsg.value = '' + e;
+            ElMessageBox.alert('出错了:' + e);
         } finally {
             loading.value = false;
         }

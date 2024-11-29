@@ -1,6 +1,7 @@
 import _ from 'lodash';
-
 export * from './log';
+export * from './Emitter';
+export * from './logger';
 
 
 

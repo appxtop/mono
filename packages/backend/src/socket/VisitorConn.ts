@@ -1,12 +1,8 @@
 import { Socket } from "socket.io";
 import _ from "lodash";
-import { log, UserModel } from "@mono/common";
+import { ApiMap, ApiMapBody, ApiResult, log, UserModel } from "@mono/common";
 import { socketModules } from "./mods";
-import { ApiMapType, execApi } from "../api";
-
-/**
- * 访客连接,暂时不能直接升级为已登录用户连接
- */
+import { execApi } from "../api";
 export class VisitorConn {
     public socket: Socket;
     user: UserModel | null = null;
@@ -19,16 +15,15 @@ export class VisitorConn {
     public async init() {
         this.socket.emit('user', this.user);
     }
-    async _doRequest(data: {
-        path: string,
-        body: any,
-    }, callback: Function) {
-        const path = data.path as keyof ApiMapType;
+    async _doRequest<K extends keyof ApiMap>(data: {
+        path: K,
+        body: ApiMapBody<K>,
+    }, callback: (result: ApiResult<K>) => void) {
+        const path = data.path;
         const body = data.body;
-        const result = await execApi({ path, body, user: this.user! });
+        const result = await execApi({ path, body, user: this.user });
         callback(result);
     }
-
     async _doSubscribe(channel: string) {
         this.subs.add(channel);
         for (const module of socketModules) {

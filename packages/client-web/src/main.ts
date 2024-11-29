@@ -11,6 +11,7 @@ import router from "./router";
 
 import App from './App.vue'
 import pinia from './store/pinia';
+import { userStore } from './store/user';
 
 const app = createApp(App);
 app.use(pinia);
@@ -21,3 +22,4 @@ app.mount('#app')
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
+console.log('user', userStore.user);

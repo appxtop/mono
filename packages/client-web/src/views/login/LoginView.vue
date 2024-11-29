@@ -25,7 +25,7 @@
             <div class="error-msg">
                 {{ errorMsg }}
             </div>
-            <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"
+            <el-button :loading="loading" type="primary" style="width: 100%; margin-bottom: 30px"
                 @click.native.prevent="handleSubmit">登录</el-button>
             <div>
                 没有账号? 点击<router-link :to="{ path: '/register' }">注册</router-link>
@@ -35,46 +35,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { validatePassword, validateUsername } from '@mono/common';
-import { apiRequest } from '../../api/apiClient';
-import { setToken } from '../../data';
-import { ws } from '../../sigleton/ws';
+import { ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { validatePassword, validateUsername } from "@mono/common";
+import { apiRequest } from "../../api/apiClient";
+import { setToken } from "../../data";
 
 const loginForm = ref<any>();
 const formData = ref({
-    username: '',
-    password: '',
+    username: "",
+    password: "",
 });
 const loading = ref(false);
-const errorMsg = ref('');
+const errorMsg = ref("");
 function handleSubmit() {
-    errorMsg.value = '';
+    errorMsg.value = "";
     loginForm.value.validate(async (valid: boolean) => {
+        if (!valid) {
+            ElMessageBox.alert("请正确输入每一项");
+            return;
+        }
         try {
-            if (valid) {
-                loading.value = true;
-                const data = { ...formData.value };
-                try {
-                    const res = await apiRequest('/api/auth/login', data);
-                    setToken(res.token);
-                    ws.newSocket();
-                    ElMessage.success("登录成功");
-                } catch (e) {
-                    errorMsg.value = '' + e;
-                }
-            } else {
-                ElMessageBox.alert('请正确输入每一项')
-            }
+            loading.value = true;
+            const data = { ...formData.value };
+            const res = await apiRequest("/api/auth/login", data);
+            setToken(res.token);
+            ElMessage.success("登录成功");
         } catch (e) {
-            ElMessageBox.alert('出错了:' + e);
+            errorMsg.value = "" + e;
+            ElMessageBox.alert("出错了:" + e);
         } finally {
             loading.value = false;
         }
-    })
+    });
 }
-
 
 const loginRules = {
     username: [
@@ -82,23 +76,22 @@ const loginRules = {
             validator: async (_rule: any, value: string) => {
                 validateUsername(value);
             },
-            trigger: 'blur'
-        }
+            trigger: "blur",
+        },
     ],
     password: [
         {
             validator: async (_rule: any, value: string) => {
                 validatePassword(value);
             },
-            trigger: 'blur'
-        }
+            trigger: "blur",
+        },
     ],
-}
+};
 </script>
 
 <style lang="less" scoped>
 .login-container {
-    background-color: var(--background-color);
     height: 100%;
 
     .title-container {

@@ -46,7 +46,6 @@
 import { ref } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { validatePassword } from '@mono/common';
-import router from '../../router';
 import { apiRequest } from '../../api/apiClient';
 
 const loginForm = ref<any>();
@@ -60,22 +59,17 @@ const errorMsg = ref('');
 function handleSubmit() {
     errorMsg.value = '';
     loginForm.value.validate(async (valid: boolean) => {
+        if (!valid) {
+            ElMessageBox.alert('请正确输入每一项')
+            return;
+        }
         try {
-            if (valid) {
-                loading.value = true;
-                const data = { ...formData.value };
-                try {
-                    await apiRequest('/api/user/setPassword', data);
-                    ElMessageBox.alert('修改成功').then(() => {
-                        router.push('/user');
-                    })
-                } catch (e) {
-                    errorMsg.value = '' + e;
-                }
-            } else {
-                ElMessageBox.alert('请正确输入每一项')
-            }
+            loading.value = true;
+            const data = { ...formData.value };
+            await apiRequest('/api/user/setPassword', data);
+            ElMessageBox.alert('修改成功');
         } catch (e) {
+            errorMsg.value = '' + e;
             ElMessageBox.alert('出错了:' + e);
         } finally {
             loading.value = false;

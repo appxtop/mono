@@ -1,12 +1,10 @@
-import { ApiError, cards, CardType, tsForin, UpdateCardsType } from "@mono/common";
+import { ApiError, ApiMap, cards, CardType, tsForin, UpdateCardsType } from "@mono/common";
 import { SessionUser } from "../types";
 import { client, getGameTime } from "@mono/dbman";
 import _ from "lodash";
-import { ApiMapType } from ".";
 
-export const card: Pick<ApiMapType, '/api/card/cards' | '/api/card/buy'> = {
+export const card: Pick<ApiMap, '/api/card/cards' | '/api/card/buy'> = {
     "/api/card/cards": {
-        user: true,
         fn: async function (_reqBody: {}, user: SessionUser) {
             let list = await client.collection('cards').find({
                 user: user._id
@@ -19,7 +17,6 @@ export const card: Pick<ApiMapType, '/api/card/cards' | '/api/card/buy'> = {
         }
     },
     "/api/card/buy": {
-        user: true,
         fn: async function (reqBody: { type: CardType }, user: SessionUser) {
             let { type } = reqBody;
             const price = cards[type].price;

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/login/LoginView.vue';
 import RegisterView from '../views/register/RegisterView.vue';
@@ -7,7 +7,17 @@ import ModifyPasswordView from '../views/user/ModifyPasswordView.vue';
 import SettingsView from '../views/settings/SettingsView.vue';
 import GameView from '../views/GameView.vue';
 import { userStore } from '../store/user';
-const routes: { path: string, name?: string, meta?: { visitor?: boolean }, component: any }[] = [
+import { evtBus } from '../sigleton/evtBus';
+
+declare module 'vue-router' {
+    interface RouteMeta {
+        /**
+         * 访客可以访问
+         */
+        visitor?: boolean
+    }
+}
+const routes: RouteRecordRaw[] = [
     {
         path: '/',
         component: HomeView,
@@ -33,8 +43,7 @@ const routes: { path: string, name?: string, meta?: { visitor?: boolean }, compo
     }, {
         path: '/user/modify-password',
         component: ModifyPasswordView
-    },
-    {
+    }, {
         path: '/settings',
         component: SettingsView
     }, {
@@ -46,8 +55,6 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes
 });
-
-
 export function checkRule() {
     const curRoute = router.currentRoute.value;
     if (userStore.user) {//认证成功了,判断是否需要跳转
@@ -66,8 +73,6 @@ export function checkRule() {
         }
     }
 }
-
-
 // 导航守卫
 router.beforeEach((to, _from, next) => {
     if (userStore.user || userStore.user === 0 || to.meta.visitor) {
@@ -82,3 +87,15 @@ router.beforeEach((to, _from, next) => {
 
 
 export default router;
+
+
+evtBus.on('API:Unauthorized', () => {
+    const curRoute = router.currentRoute.value;
+    router.push({
+        path: '/login',
+        query: {
+            redirect: curRoute.path
+        }
+    });
+});
+

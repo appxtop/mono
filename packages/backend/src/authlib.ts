@@ -21,7 +21,7 @@ export async function checkToken(token?: string) {
         if (!sessionUserStr) {
             throw new ApiError(ApiErrorCode.Unauthorized, "登录过期");
         }
-        const sessionUser = JSON.parse(sessionUserStr);
+        const sessionUser = JSON.parse(sessionUserStr) as SessionUser;
         return sessionUser;
     } catch (e) {
         throw new ApiError(ApiErrorCode.Unauthorized, "登录失效");

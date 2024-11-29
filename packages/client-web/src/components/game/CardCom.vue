@@ -10,7 +10,7 @@
                 <template v-if="item">
                   {{ type }}:
                   <span
-                    :style="{ color: item.base + item.increment * num > gameStore.card.cards_type[type]![0].num ? 'red' : void 0 }">
+                    :style="{ color: item.base + item.increment * num > cardStore.subData.cards_type[type]![0].num ? 'red' : void 0 }">
                     {{ item.base + item.increment * num }}
                   </span>
                 </template>
@@ -44,18 +44,18 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, useTemplateRef } from "vue";
-import { gameStore } from "../../store/game";
 import { CardModel, cards } from "@mono/common";
 import { apiRequest } from "../../api/apiClient";
 import { ElMessage } from "element-plus";
 import _ from "lodash";
+import { cardStore } from "../../store/card";
 const props = defineProps<{
   model: CardModel;
 }>();
 
 const id = props.model._id;
 
-const model = computed(() => gameStore.card.cards[id]);
+const model = computed(() => cardStore.subData.cards[id]);
 const price = computed(() => cards[model.value.type].price)
 const name = computed(() => model.value.type);
 const num = computed(() => model.value.num);
@@ -71,7 +71,7 @@ async function handleClick() {
   else if (model.value.type === '猫薄荷田') {
     try {
       const res = await apiRequest('/api/card/buy', { type: '猫薄荷田', num: 1 });
-      gameStore.updateCard(res);
+      cardStore.updateCard(res);
       ElMessage.success({
         message: '购买成功',
         grouping: true
@@ -123,7 +123,7 @@ onMounted(() => {
         drag_curClientY: evt.clientY,
         pointerId: evt.pointerId,
       };
-      com.style.zIndex = (gameStore.maxCardIndex++).toString();
+      com.style.zIndex = (cardStore.maxCardIndex++).toString();
     };
     com.onpointermove = (evt) => {
       evt.preventDefault();
