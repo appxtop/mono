@@ -3,16 +3,26 @@ import _ from "lodash";
 import { ApiMap, ApiMapBody, ApiResult, log, UserModel } from "@mono/common";
 import { socketModules } from "./mods";
 import { execApi } from "../api";
+import { checkToken } from "../authlib";
+import { client } from "@mono/dbman";
 export class VisitorConn {
-    public socket: Socket;
+    socket: Socket;
+    token: string;
     user: UserModel | null = null;
     private subs = new Set<string>();//用来取消订阅的
-    constructor(socket: Socket) {
+    constructor(socket: Socket, token: string) {
         this.socket = socket;
+        this.token = token;
         socket.on('request', this._doRequest.bind(this));
         socket.on('subscribe', this._doSubscribe.bind(this));
+        const room = 'token:' + token;
+        socket.join(room);
     }
     public async init() {
+        const user = await checkToken(this.token);
+        if (user) {
+            this.user = await client.collection('users').findOne({ _id: user._id });
+        }
         this.socket.emit('user', this.user);
     }
     async _doRequest<K extends keyof ApiMap>(data: {

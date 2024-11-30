@@ -1,7 +1,5 @@
 import http from "http";
 import { Server } from "socket.io";
-import { checkToken } from "../authlib";
-import { client } from "@mono/dbman";
 import { VisitorConn } from "./VisitorConn";
 import { UserConn } from "./UserConn";
 import { HEADER_TOKEN_KEY } from "@mono/common";
@@ -13,26 +11,16 @@ export function startSocketServer(server: http.Server) {
         path: '/socket'
     });
     socketServer.on('connect', async socket => {
-        try {
-            const token = socket.handshake.auth[HEADER_TOKEN_KEY] as string;
-            const { _id } = await checkToken(token);
-            const user = await client.collection('users').findOne({ _id }, { passwordHash: false });
-            if (!user) {
-                throw new Error("错误用户");
-            }
-            new UserConn(socket, user).init();
-
-        } catch (e) {
-            new VisitorConn(socket).init();
+        const token = socket.handshake.auth[HEADER_TOKEN_KEY] as string;
+        if (!token) {
+            throw new Error("需要token");
         }
+        await new VisitorConn(socket, token).init();
     });
-
     socketModules.forEach(m => {
         m.init && m.init();
     });
-
 }
-
 
 export async function roomEmit(room: string, name: string, msg: any) {
     if (!socketServer) {
@@ -44,3 +32,4 @@ export async function roomEmit(room: string, name: string, msg: any) {
 
 
 export const RoomEmitKey_user = 'user:';
+export const RoomEmitKey_token = 'token:';

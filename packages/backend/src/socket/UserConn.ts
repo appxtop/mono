@@ -8,8 +8,8 @@ import { RoomEmitKey_user } from ".";
  */
 export class UserConn extends VisitorConn {
     user: UserModel;
-    constructor(conn: Socket, user: UserModel) {
-        super(conn);
+    constructor(conn: Socket, token: string, user: UserModel) {
+        super(conn, token);
         this.user = user;
     }
     public async init() {
