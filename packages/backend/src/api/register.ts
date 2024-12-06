@@ -2,7 +2,7 @@ import { client } from "@mono/dbman";
 import { validateEmail, validateNickname, validatePassword, validateUsername, UserModel, ApiError, ApiMap } from "@mono/common";
 import { hashPwd, genToken } from "../authlib";
 import { checkVercode } from "./user";
-
+import { roomEmit, RoomEmitKey_token } from "../socket";
 
 export const register: Pick<ApiMap,
     | '/api/register/submit'
@@ -17,6 +17,7 @@ export const register: Pick<ApiMap,
             nickname: string;
             email: string;
             verCode: string;
+            token: string;
         }): Promise<{ token: string; }> {
             const username = body.username;
             const password = body.password;
@@ -24,6 +25,7 @@ export const register: Pick<ApiMap,
             const email = body.email.toLowerCase();
             const usernameLower = username.toLowerCase();
             const verCode = body.verCode;
+            let token = body.token;
 
             validateEmail(email);
             validateNickname(nickname);
@@ -60,7 +62,9 @@ export const register: Pick<ApiMap,
                 email,
             };
             const res = await client.collection('users').insertOne(userModel);
-            const token = await genToken({ _id: res._id });
+            token = await genToken({ _id: res._id }, token);
+            const room = RoomEmitKey_token + token;
+            await roomEmit(room, "user", userModel);
             return { token };
         }
     },

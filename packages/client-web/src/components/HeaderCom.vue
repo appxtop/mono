@@ -1,11 +1,6 @@
 <template>
   <div class="header-container">
-    <el-menu
-      :default-active="$route.path"
-      mode="horizontal"
-      :router="true"
-      :ellipsis="false"
-    >
+    <el-menu :default-active="$route.path" mode="horizontal" :router="true" :ellipsis="false">
       <el-menu-item class="home" index="/">
         <img style="height: 100%" class="logo" src="/logo.svg" />Miao
       </el-menu-item>
@@ -14,7 +9,7 @@
         <el-sub-menu>
           <template #title>{{
             user.nickname + "(" + user.username + ")"
-          }}</template>
+            }}</template>
           <el-menu-item index="/user"> 个人中心 </el-menu-item>
           <el-menu-item index="/settings"> 设置 </el-menu-item>
           <el-menu-item @click="handleLogout()" index="logout">
@@ -53,7 +48,7 @@ function handleLogout() {
     --el-menu-horizontal-height: 40px;
   }
 
-  .el-menu--horizontal > .el-menu-item {
+  .el-menu--horizontal>.el-menu-item {
     &:nth-child(1) {
       margin-right: auto;
     }

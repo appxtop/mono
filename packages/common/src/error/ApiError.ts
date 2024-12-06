@@ -4,7 +4,7 @@ export enum ApiErrorCode {
     Unauthorized = 1401,
     ApiNotFound = 1404,
     Message = 1201,
-    ParamsError = 1501
+    InvalidParams = 1501
 }
 export const apiErrorMessages: { [code in ApiErrorCode]: string } = {
     1500: "系统异常",

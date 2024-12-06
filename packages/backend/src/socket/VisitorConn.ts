@@ -5,6 +5,7 @@ import { socketModules } from "./mods";
 import { execApi } from "../api";
 import { checkToken } from "../authlib";
 import { client } from "@mono/dbman";
+import { RoomEmitKey_token } from ".";
 export class VisitorConn {
     socket: Socket;
     token: string;
@@ -15,15 +16,20 @@ export class VisitorConn {
         this.token = token;
         socket.on('request', this._doRequest.bind(this));
         socket.on('subscribe', this._doSubscribe.bind(this));
-        const room = 'token:' + token;
+        const room = RoomEmitKey_token + token;
         socket.join(room);
     }
     public async init() {
-        const user = await checkToken(this.token);
-        if (user) {
-            this.user = await client.collection('users').findOne({ _id: user._id });
+        try {
+            const user = await checkToken(this.token);
+            if (user) {
+                this.user = await client.collection('users').findOne({ _id: user._id });
+            }
+        } catch (e: any) {
+            log('token验证失败', e.message);
+        } finally {
+            this.socket.emit('user', this.user);
         }
-        this.socket.emit('user', this.user);
     }
     async _doRequest<K extends keyof ApiMap>(data: {
         path: K,

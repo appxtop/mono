@@ -43,12 +43,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ElMessageBox } from 'element-plus';
+import { ref, useTemplateRef } from 'vue';
+import { ElMessageBox, FormInstance, FormRules } from 'element-plus';
 import { validatePassword } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
 
-const loginForm = ref<any>();
+const loginForm = useTemplateRef<FormInstance>('loginForm');
+
 const formData = ref({
     oldPassword: '',
     newPassword: '',
@@ -58,7 +59,7 @@ const loading = ref(false);
 const errorMsg = ref('');
 function handleSubmit() {
     errorMsg.value = '';
-    loginForm.value.validate(async (valid: boolean) => {
+    loginForm.value!.validate(async (valid) => {
         if (!valid) {
             ElMessageBox.alert('请正确输入每一项')
             return;
@@ -78,10 +79,10 @@ function handleSubmit() {
 }
 
 
-const loginRules = {
+const loginRules: FormRules<typeof formData> = {
     oldPassword: [
         {
-            validator: async (_rule: any, value: string) => {
+            validator: (_rule: any, value: string) => {
                 validatePassword(value);
             },
             trigger: 'blur'
@@ -89,7 +90,7 @@ const loginRules = {
     ],
     newPassword: [
         {
-            validator: async (_rule: any, value: string) => {
+            validator: (_rule: any, value: string) => {
                 validatePassword(value);
             },
             trigger: 'blur'
@@ -97,7 +98,7 @@ const loginRules = {
     ],
     confirmPassword: [
         {
-            validator: async (_rule: any, value: string) => {
+            validator: (_rule: any, value: string) => {
                 validatePassword(value);
                 if (value === '') {
                     throw new Error('请再次输入密码');

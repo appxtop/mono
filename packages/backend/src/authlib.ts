@@ -3,8 +3,13 @@ import { SessionUser } from './types';
 import { ApiError, ApiErrorCode, KVKeys } from '@mono/common';
 import { kvClient } from '@mono/dbman';
 import bcrypt from 'bcryptjs';
-export async function genToken(userModel: SessionUser) {
-    const token = randomUUID();
+export async function genToken(userModel: SessionUser, token?: string) {
+    if (!token) {
+        token = randomUUID();
+    }
+    if (token.length !== 36) {
+        throw new ApiError(ApiErrorCode.InvalidParams);
+    }
     const sessionKey = KVKeys.SESSION + token;
     const sessionValue = JSON.stringify(userModel);
     const expSeconds = 60 * 60 * 1;//过期时间一小时

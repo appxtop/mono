@@ -3,13 +3,9 @@ import { ApiErrorCode } from "../error";
 import { CardModel, CardType } from "./model";
 
 
-interface ApiMapBase {
-    [key: string]: {
-        fn: (...args: any[]) => Promise<any>;
-    }
-}
 
-export interface ApiMap<User = { _id: string }> extends ApiMapBase {
+
+export interface ApiMap<User = { _id: string }> {
     "/api/register/submit": {
         fn: (body: {
             username: string;
@@ -17,6 +13,7 @@ export interface ApiMap<User = { _id: string }> extends ApiMapBase {
             nickname: string;
             email: string;
             verCode: string;
+            token: string;
         }) => Promise<{
             token: string;
         }>,
@@ -44,6 +41,7 @@ export interface ApiMap<User = { _id: string }> extends ApiMapBase {
         fn: (body: {
             username: string;
             password: string;
+            token: string;
         }) => Promise<{ token: string }>,
     },
 

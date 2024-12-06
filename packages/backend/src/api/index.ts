@@ -18,23 +18,15 @@ const apiMap: ApiMap = {
     ...register,
     ...user,
     ...card,
-    // "/test": {
+    // "/test": {  
     //     fn: (body: { uuuu: string }) => {
     //         const { uuuu } = body;
     //         console.log(uuuu);
     //         return 123;
-    //     }
+    //     }860 7 0000000006  1 78
     // }
 };
-(async () => {
-    const res = await execApi({
-        path: '/api/auth/login',
-        body: {
-            username: '',
-            password: ''
-        }
-    });
-});
+
 
 export async function execApi<K extends keyof ApiMap>(opts: {
     path: K;
@@ -51,7 +43,7 @@ export async function execApi<K extends keyof ApiMap>(opts: {
         };
     }
     try {
-        const fn = apiItem.fn;
+        const fn = apiItem.fn as any
         if (fn.length == 2) {
             const user_ = user || (await checkToken(token));
             if (!user_) {
@@ -60,7 +52,7 @@ export async function execApi<K extends keyof ApiMap>(opts: {
             const data = await fn(body, user_);
             return {
                 ok: 1,
-                data: data
+                data: data as any
             };
         } else if (fn.length == 1) {
             const data = await fn(body);

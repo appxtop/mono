@@ -26,7 +26,8 @@ apiClient.interceptors.request.use(config => {
 // });
 
 export async function apiRequest<K extends keyof ApiMap>(path: K, body: ApiMapBody<K>): Promise<ApiMapUnwrappedReturn<K>> {
-    const res = await ws.request(path, body);
+    // const res = await ws.request(path, body);
+    const res = (await apiClient.post(path, body)).data;
     if (res.ok) {
         return res.data;
     } else {

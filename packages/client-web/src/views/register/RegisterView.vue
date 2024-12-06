@@ -1,11 +1,11 @@
 <template>
     <div class="login-container">
-        <el-form ref="loginFormRef" :model="formData" :rules="loginRules" class="login-form">
+        <el-form ref="formRef" :model="formModel" :rules="formRules" class="login-form">
             <div class="title-container">
                 <h3 class="title">注册账号</h3>
             </div>
             <el-form-item prop="username">
-                <el-input v-model="formData.username" placeholder="请输入用户名">
+                <el-input v-model="formModel.username" placeholder="请输入用户名">
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <user />
@@ -15,7 +15,7 @@
             </el-form-item>
 
             <el-form-item prop="nickname">
-                <el-input placeholder="请输入昵称" v-model="formData.nickname">
+                <el-input placeholder="请输入昵称" v-model="formModel.nickname">
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <View />
@@ -25,7 +25,7 @@
             </el-form-item>
 
             <el-form-item prop="email">
-                <el-input placeholder="请输入邮箱" v-model="formData.email">
+                <el-input placeholder="请输入邮箱" v-model="formModel.email">
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <message />
@@ -35,7 +35,7 @@
             </el-form-item>
 
             <el-form-item prop="verCode">
-                <el-input placeholder="请输入验证码" v-model="formData.verCode">
+                <el-input placeholder="请输入验证码" v-model="formModel.verCode">
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <aim />
@@ -51,7 +51,7 @@
 
 
             <el-form-item prop="password">
-                <el-input v-model="formData.password" placeholder="请输入密码" show-password>
+                <el-input v-model="formModel.password" placeholder="请输入密码" show-password>
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <unlock />
@@ -61,7 +61,7 @@
             </el-form-item>
 
             <el-form-item prop="confirmPassword">
-                <el-input placeholder="请再次输入一次密码" show-password v-model="formData.confirmPassword">
+                <el-input placeholder="请再次输入一次密码" show-password v-model="formModel.confirmPassword">
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <unlock />
@@ -83,14 +83,14 @@
 
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus';
 import { validateEmail, validateNickname, validatePassword, validateUsername, validateVerCode } from '@mono/common';
 import { apiRequest } from '../../api/apiClient';
-import { setToken } from '../../data';
+import { getToken, setToken } from '../../data';
 import router from '../../router';
 
-const loginForm = useTemplateRef<any>('loginFormRef');
-const formData = ref({
+const formRef = useTemplateRef<FormInstance>('formRef');
+const formModel = ref({
     username: 'test',
     password: 'test123456',
     nickname: '天侠',
@@ -101,62 +101,66 @@ const formData = ref({
 const verCode_btn_disableText = ref("");
 const verCode_btn_enable = ref(true);
 async function handleSendVerCode() {
-    loginForm.value.validateField(['email'], async (valid: boolean) => {
-        if (!valid) {
-            ElMessageBox.alert('邮箱不符合条件');
-            return;
-        }
-        try {
-            verCode_btn_disableText.value = "发送中...";
-            verCode_btn_enable.value = false;
-            await apiRequest('/api/user/sendVerCode', { email: formData.value.email });
-            ElMessage.success("验证码发送成功");
-            //60秒后重发
-            let num = 60;
-            const timeoutId = setInterval(() => {
-                num--;
-                verCode_btn_disableText.value = `${num}秒后重发`;
-                if (num <= 0) {
-                    verCode_btn_enable.value = true;
-                    clearTimeout(timeoutId)
-                }
-            }, 1000);
-        } catch (e) {
-            ElMessageBox.alert('' + e);
-            verCode_btn_enable.value = true;
-        }
-    });
+    const form = formRef.value!;
+
+    try {
+        await form.validateField(['email']);
+    } catch (e: any) {
+        ElMessageBox.alert('邮箱验证失败');
+        return;
+    }
+    verCode_btn_disableText.value = "发送中...";
+    verCode_btn_enable.value = false;
+    try {
+        await apiRequest('/api/user/sendVerCode', { email: formModel.value.email });
+        ElMessage.success("验证码发送成功");
+        //60秒后重发
+        let num = 60;
+        const timeoutId = setInterval(() => {
+            num--;
+            verCode_btn_disableText.value = `${num}秒后重发`;
+            if (num <= 0) {
+                verCode_btn_enable.value = true;
+                clearTimeout(timeoutId)
+            }
+        }, 1000);
+    } catch (e: any) {
+        ElMessageBox.alert('' + e.message);
+        verCode_btn_enable.value = true;
+    }
+
 }
 
 const loading = ref(false);
 const errorMsg = ref('');
-function handleSubmit() {
+async function handleSubmit() {
+    const form = formRef.value!;
     errorMsg.value = '';
-    loginForm.value.validate(async (valid: boolean) => {
-        if (!valid) {
+    loading.value = true;
+    try {
+        await form.validate();
+        const data = { ...formModel.value, token: getToken() };
+        const res = await apiRequest('/api/register/submit', data);
+        setToken(res.token);
+        router.push('/');
+        ElMessage.success("注册成功");
+    } catch (e: any) {
+        if (!e.message) {
             ElMessageBox.alert("请正确输入每一项");
             return;
         }
-        try {
-            loading.value = true;
-            const data = { ...formData.value };
-            const res = await apiRequest('/api/register/submit', data);
-            setToken(res.token);
-            router.push('/');
-            ElMessage.success("注册成功");
-        } catch (e) {
-            errorMsg.value = '' + e;
-            ElMessageBox.alert('出错了:' + e);
-        } finally {
-            loading.value = false;
-        }
-    });
+        errorMsg.value = '' + e.message;
+        ElMessageBox.alert('出错了:' + e.message);
+    } finally {
+        loading.value = false;
+    }
+
 }
 
-const loginRules = {
+const formRules: FormRules<typeof formModel> = {
     username: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validateUsername(value);
                 await apiRequest('/api/register/checkUsername', { username: value })
             },
@@ -165,7 +169,7 @@ const loginRules = {
     ],
     password: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validatePassword(value);
             },
             trigger: 'blur'
@@ -173,7 +177,7 @@ const loginRules = {
     ],
     nickname: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validateNickname(value);
                 await apiRequest('/api/register/checkNickname', { nickname: value });
             },
@@ -182,7 +186,7 @@ const loginRules = {
     ],
     email: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validateEmail(value);
                 await apiRequest('/api/register/checkEmail', { email: value });
             },
@@ -191,7 +195,7 @@ const loginRules = {
     ],
     verCode: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validateVerCode(value);
             },
             trigger: 'blur'
@@ -199,10 +203,10 @@ const loginRules = {
     ],
     confirmPassword: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 if (value === '') {
                     throw new Error('请再次输入密码');
-                } else if (value !== formData.value.password) {
+                } else if (value !== formModel.value.password) {
                     throw new Error('两次输入的密码不一致!');
                 }
             },

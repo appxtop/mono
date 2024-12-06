@@ -1,11 +1,11 @@
 <template>
     <div class="login-container">
-        <el-form ref="loginForm" :model="formData" :rules="loginRules" class="login-form">
+        <el-form ref="formRef" :model="formModel" :rules="formRules" class="login-form">
             <div class="title-container">
                 <h3 class="title">账号登录</h3>
             </div>
             <el-form-item prop="username">
-                <el-input v-model="formData.username" placeholder="请输入用户名">
+                <el-input v-model="formModel.username" placeholder="请输入用户名">
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <user />
@@ -14,7 +14,7 @@
                 </el-input>
             </el-form-item>
             <el-form-item prop="password">
-                <el-input v-model="formData.password" placeholder="请输入密码" show-password>
+                <el-input v-model="formModel.password" placeholder="请输入密码" show-password>
                     <template #prefix>
                         <el-icon class="el-input__icon">
                             <unlock />
@@ -26,7 +26,7 @@
                 {{ errorMsg }}
             </div>
             <el-button :loading="loading" type="primary" style="width: 100%; margin-bottom: 30px"
-                @click.native.prevent="handleSubmit">登录</el-button>
+                @click.native.prevent="handleSubmit()">登录</el-button>
             <div>
                 没有账号? 点击<router-link :to="{ path: '/register' }">注册</router-link>
             </div>
@@ -35,47 +35,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ref, useTemplateRef } from "vue";
+import { ElMessage, ElMessageBox, FormInstance, FormRules } from "element-plus";
 import { validatePassword, validateUsername } from "@mono/common";
 import { apiRequest } from "../../api/apiClient";
-import { setToken } from "../../data";
+import { getToken, setToken } from "../../data";
 import router from "../../router";
 
-const loginForm = ref<any>();
-const formData = ref({
+const formRef = useTemplateRef<FormInstance>("formRef")
+const formModel = ref({
     username: "",
     password: "",
 });
-const loading = ref(false);
 const errorMsg = ref("");
-function handleSubmit() {
+const loading = ref(false);
+async function handleSubmit() {
+    const form = formRef.value!;
     errorMsg.value = "";
-    loginForm.value.validate(async (valid: boolean) => {
-        if (!valid) {
+    loading.value = true;
+    try {
+        await form.validate();
+        const data = { ...formModel.value, token: getToken() };
+        const res = await apiRequest("/api/auth/login", data);
+        setToken(res.token);
+        router.push('/');
+        ElMessage.success("登录成功");
+    } catch (e: any) {
+        if (!e.message) {
             ElMessageBox.alert("请正确输入每一项");
             return;
         }
-        try {
-            loading.value = true;
-            const data = { ...formData.value };
-            const res = await apiRequest("/api/auth/login", data);
-            setToken(res.token);
-            router.push('/');
-            ElMessage.success("登录成功");
-        } catch (e) {
-            errorMsg.value = "" + e;
-            ElMessageBox.alert("出错了:" + e);
-        } finally {
-            loading.value = false;
-        }
-    });
+        errorMsg.value = "" + e.message;
+        ElMessageBox.alert("出错了:" + e.message);
+    } finally {
+        loading.value = false;
+    }
 }
 
-const loginRules = {
+const formRules: FormRules<typeof formModel> = {
     username: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validateUsername(value);
             },
             trigger: "blur",
@@ -83,7 +83,7 @@ const loginRules = {
     ],
     password: [
         {
-            validator: async (_rule: any, value: string) => {
+            asyncValidator: async (_rule, value: string) => {
                 validatePassword(value);
             },
             trigger: "blur",
